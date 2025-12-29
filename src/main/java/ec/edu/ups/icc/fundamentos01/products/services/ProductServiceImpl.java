@@ -1,84 +1,98 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
-import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
+import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
+import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
 import ec.edu.ups.icc.fundamentos01.products.dtos.*;
-import ec.edu.ups.icc.fundamentos01.products.entities.Product;
+import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 import ec.edu.ups.icc.fundamentos01.products.mappers.ProductMapper;
+import ec.edu.ups.icc.fundamentos01.products.repositories.ProductRepository;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private List<Product> products = new ArrayList<>();
-    private int currentId = 1;
+    private final ProductRepository repository;
+
+    public ProductServiceImpl(ProductRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public List<ProductResponseDto> findAll() {
-        return products.stream()
-                .map(ProductMapper::toResponse)
+        return repository.findAll()
+                .stream()
+                .map(ProductMapper::toDto)
                 .toList();
     }
 
-@Override
-public Object findOne(int id) {
-    for (Product product : products) {
-        if (product.getId() == id) {
-            return ProductMapper.toResponse(product);
-        }
+    @Override
+    public ProductResponseDto findOne(Long id) {
+        ProductEntity entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new NotFoundException("Producto no encontrado con ID: " + id)
+                );
+
+        return ProductMapper.toDto(entity);
     }
-    return new Object() {
-        public String error = "Product not found";
-    };
-}
 
     @Override
     public ProductResponseDto create(CreateProductDto dto) {
-        Product product = ProductMapper.toEntity(currentId++, dto.name, dto.price);
-        products.add(product);
-        return ProductMapper.toResponse(product);
+
+        
+        if (repository.existsByName(dto.getName())) {
+        throw new ConflictException(
+            "Ya existe un producto con el nombre: " + dto.getName()
+        );
+    }
+
+        ProductEntity entity = new ProductEntity();
+        entity.setName(dto.getName());
+        entity.setPrice(dto.getPrice());
+        entity.setStock(0);
+        entity.setDescription("Sin descripcion");
+
+        repository.save(entity);
+        return ProductMapper.toDto(entity);
     }
 
     @Override
-    public Object update(int id, UpdateProductDto dto) {
-        Product product = products.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .orElse(null);
+    public ProductResponseDto update(Long id, UpdateProductDto dto) {
+        ProductEntity entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new NotFoundException("Producto no encontrado con ID: " + id)
+                );
 
-        if (product == null)
-            return new Object() { public String error = "Product not found"; };
+        entity.setName(dto.getName());
+        entity.setPrice(dto.getPrice());
+        entity.setStock(dto.getStock());
 
-        product.setName(dto.name);
-        product.setPrice(dto.price);
-
-        return ProductMapper.toResponse(product);
+        repository.save(entity);
+        return ProductMapper.toDto(entity);
     }
 
     @Override
-    public Object partialUpdate(int id, PartialUpdateProductDto dto) {
-        Product product = products.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .orElse(null);
+    public ProductResponseDto partialUpdate(Long id, PartialUpdateProductDto dto) {
+        ProductEntity entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new NotFoundException("Producto no encontrado con ID: " + id)
+                );
 
-        if (product == null)
-            return new Object() { public String error = "Product not found"; };
+        if (dto.getName() != null) entity.setName(dto.getName());
+        if (dto.getPrice() != null) entity.setPrice(dto.getPrice());
+        if (dto.getStock() != null) entity.setStock(dto.getStock());
 
-        if (dto.name != null) product.setName(dto.name);
-        if (dto.price != null) product.setPrice(dto.price);
-
-        return ProductMapper.toResponse(product);
+        repository.save(entity);
+        return ProductMapper.toDto(entity);
     }
 
     @Override
-    public Object delete(int id) {
-        boolean removed = products.removeIf(p -> p.getId() == id);
-        if (!removed)
-            return new Object() { public String error = "Product not found"; };
+    public void delete(Long id) {
+        ProductEntity entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new NotFoundException("Producto no encontrado con ID: " + id)
+                );
 
-        return new Object() { public String message = "Deleted successfully"; };
+        repository.delete(entity);
     }
 }

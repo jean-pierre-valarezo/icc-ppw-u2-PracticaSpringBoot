@@ -9,15 +9,15 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 
 public interface ProductService {
 
-    List<ProductResponseDto> findAll();
+     List<ProductResponseDto> findAll();
 
-    Object findOne(int id);
+    ProductResponseDto findOne(Long id);
 
     ProductResponseDto create(CreateProductDto dto);
 
-    Object update(int id, UpdateProductDto dto);
+    ProductResponseDto update(Long id, UpdateProductDto dto);
 
-    Object partialUpdate(int id, PartialUpdateProductDto dto);
+    ProductResponseDto partialUpdate(Long id, PartialUpdateProductDto dto);
 
-    Object delete(int id);
+    void delete(Long id);
 }

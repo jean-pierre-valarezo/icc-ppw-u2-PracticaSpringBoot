@@ -1,6 +1,14 @@
+server:
+  port: 9000
+
 spring:
-    application:
-        name: "fundamentos01"
-        port: 9000
-        servel:t:
-            context-path: "/fundamentos01"
+  datasource:
+    url: jdbc:postgresql://localhost:5433/devdb
+    username: ups
+    password: ups123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect

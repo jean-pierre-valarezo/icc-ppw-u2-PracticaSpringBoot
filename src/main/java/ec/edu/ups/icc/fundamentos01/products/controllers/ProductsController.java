@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import ec.edu.ups.icc.fundamentos01.products.dtos.*;
 import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,27 +24,31 @@ public class ProductsController {
     }
 
     @GetMapping("/{id}")
-    public Object findOne(@PathVariable int id) {
+    public ProductResponseDto findOne(@PathVariable Long id) {
         return service.findOne(id);
     }
 
     @PostMapping
-    public ProductResponseDto create(@RequestBody CreateProductDto dto) {
+    public ProductResponseDto create(@Valid @RequestBody CreateProductDto dto) {
         return service.create(dto);
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable int id, @RequestBody UpdateProductDto dto) {
+    public ProductResponseDto update(@PathVariable Long id, @Valid @RequestBody UpdateProductDto dto) {
         return service.update(id, dto);
     }
 
     @PatchMapping("/{id}")
-    public Object partialUpdate(@PathVariable int id, @RequestBody PartialUpdateProductDto dto) {
+    public ProductResponseDto partialUpdate(
+            @PathVariable Long id, @Valid
+            @RequestBody PartialUpdateProductDto dto) {
         return service.partialUpdate(id, dto);
     }
 
-    @DeleteMapping("/{id}")
-    public Object delete(@PathVariable int id) {
-        return service.delete(id);
-    }
+   @DeleteMapping("/{id}")
+public String delete(@PathVariable Long id) {
+    service.delete(id);
+    return "Producto eliminado correctamente";
+}
+
 }
