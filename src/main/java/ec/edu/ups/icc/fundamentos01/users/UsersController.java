@@ -1,5 +1,6 @@
 package ec.edu.ups.icc.fundamentos01.users;
 
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
@@ -49,5 +50,18 @@ public class UsersController {
     public Object delete(@PathVariable int id) {
         return service.delete(id);
     }
+    @GetMapping("/{id}/products-v2")
+    public List<ProductResponseDto> getUserProductsWithFilters(
+            @PathVariable Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Long categoryId
+    ) {
+        return service.getProductsByUserIdWithFilters(
+            id, name, minPrice, maxPrice, categoryId
+        );
+    }
+
 }
 

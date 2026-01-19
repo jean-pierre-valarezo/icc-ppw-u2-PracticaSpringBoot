@@ -1,38 +1,21 @@
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Positive;
 
 public class PartialUpdateProductDto {
 
-    private String name;
+    public String name;
 
     @Positive(message = "El precio debe ser mayor a 0")
-    private Double price;
+    public Double price;
 
-    @Positive(message = "El stock debe ser mayor a 0")
-    private Integer stock;
 
-    public String getName() {
-        return name;
-    }
+    public String description;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public List<Long> categoryIds;
 
-    public Double getPrice() {
-        return price;
-    }
+   
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
 }

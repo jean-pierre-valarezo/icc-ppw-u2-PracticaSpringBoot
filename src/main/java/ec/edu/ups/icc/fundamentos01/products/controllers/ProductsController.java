@@ -2,20 +2,27 @@ package ec.edu.ups.icc.fundamentos01.products.controllers;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import ec.edu.ups.icc.fundamentos01.products.dtos.*;
 import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductsController {
 
+    
+
     private final ProductService service;
 
     public ProductsController(ProductService service) {
         this.service = service;
+       
     }
 
     @GetMapping
@@ -50,5 +57,14 @@ public String delete(@PathVariable Long id) {
     service.delete(id);
     return "Producto eliminado correctamente";
 }
+
+@PostMapping("/validate-name")
+public ResponseEntity <Boolean> validateName(@RequestBody ValidateProductNameDto dto) {
+    
+    service.validateName((long) dto.id, dto.name);
+
+    return ResponseEntity.ok(true);
+}
+
 
 }

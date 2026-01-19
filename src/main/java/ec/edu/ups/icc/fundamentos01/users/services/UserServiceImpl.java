@@ -1,67 +1,95 @@
 package ec.edu.ups.icc.fundamentos01.users.services;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.mappers.ProductMapper;
+
+import ec.edu.ups.icc.fundamentos01.products.repositories.ProductRepository;
 import ec.edu.ups.icc.fundamentos01.users.dtos.*;
-import ec.edu.ups.icc.fundamentos01.users.entities.User;
+import ec.edu.ups.icc.fundamentos01.users.dtos.category.repository.UserRepository;
+import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 import ec.edu.ups.icc.fundamentos01.users.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService{
 
-    private List<User> users = new ArrayList<>();
-    private int currentId = 1;
+    private UserRepository userRepository;  
+
+    private ProductRepository productRepository;
+
+    public UserServiceImpl(UserRepository userRepository, ProductRepository productRepository) {
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
+    }
 
     @Override
     public List<UserResponseDto> findAll() {
-        return users.stream().map(UserMapper::toResponse).toList();
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toResponse)
+                .toList();
     }
 
     @Override
     public Object findOne(int id) {
-        return users.stream()
-                .filter(u -> u.getId() == id)
-                .findFirst()
-                .map(u -> (Object) UserMapper.toResponse(u))
-                .orElseGet(() -> new Object() { public String error = "User not found"; });
+         UserEntity user = userRepository.findById((long) id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return UserMapper.toResponse(user);
     }
 
     @Override
     public UserResponseDto create(CreateUserDto dto) {
-        User user = UserMapper.toEntity(currentId++, dto.name, dto.email);
-        users.add(user);
-        return UserMapper.toResponse(user);
+        UserEntity user = UserMapper.toEntity(null, dto.name, dto.email);
+        UserEntity saved = userRepository.save(user);
+        return UserMapper.toResponse(saved);
     }
 
     @Override
     public Object update(int id, UpdateUserDto dto) {
-        User user = users.stream().filter(u -> u.getId() == id).findFirst().orElse(null);
-        if (user == null) return new Object() { public String error = "User not found"; };
+        UserEntity user = userRepository.findById((long) id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         user.setName(dto.name);
         user.setEmail(dto.email);
 
-        return UserMapper.toResponse(user);
+        UserEntity saved = userRepository.save(user);
+        return UserMapper.toResponse(saved);
     }
 
     @Override
     public Object partialUpdate(int id, PartialUpdateUserDto dto) {
-        User user = users.stream().filter(u -> u.getId() == id).findFirst().orElse(null);
-        if (user == null) return new Object() { public String error = "User not found"; };
+        UserEntity user = userRepository.findById((long) id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (dto.name != null) user.setName(dto.name);
         if (dto.email != null) user.setEmail(dto.email);
 
-        return UserMapper.toResponse(user);
+        UserEntity saved = userRepository.save(user);
+        return UserMapper.toResponse(saved);
     }
+    
 
     @Override
     public Object delete(int id) {
-        boolean removed = users.removeIf(u -> u.getId() == id);
-        if (!removed) return new Object() { public String error = "User not found"; };
-
-        return new Object() { public String message = "Deleted successfully"; };
+       if (!userRepository.existsById((long) id)) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+        userRepository.deleteById((long) id);
+        return id;
     }
+
+
+    @Override
+    public List<ProductResponseDto> getProductsByUserIdWithFilters(Long userId, String name, Double minPrice,
+            Double maxPrice, Long categoryId) {
+        userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        return productRepository .findByOwnerWithFilters(userId, name, minPrice, maxPrice, categoryId)
+            .stream()
+            .map(ProductMapper::toDto)
+            .toList();    }
 }

@@ -19,5 +19,11 @@ public interface ProductService {
 
     ProductResponseDto partialUpdate(Long id, PartialUpdateProductDto dto);
 
+   boolean validateName(Long id, String name);
+    
+
     void delete(Long id);
+
+    List<ProductResponseDto> findByCategoryName(String categoryName);
+
 }

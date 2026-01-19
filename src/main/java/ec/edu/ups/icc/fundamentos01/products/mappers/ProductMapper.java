@@ -10,7 +10,6 @@ public class ProductMapper {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setPrice(entity.getPrice());
-        dto.setStock(entity.getStock());
         return dto;
     }
 }
