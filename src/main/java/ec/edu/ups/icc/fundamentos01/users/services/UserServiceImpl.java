@@ -82,14 +82,35 @@ public class UserServiceImpl implements UserService{
     }
 
 
-    @Override
-    public List<ProductResponseDto> getProductsByUserIdWithFilters(Long userId, String name, Double minPrice,
-            Double maxPrice, Long categoryId) {
-        userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+    public List<ProductResponseDto> getProductsByUserId(Long userId) {
 
-        return productRepository .findByOwnerWithFilters(userId, name, minPrice, maxPrice, categoryId)
-            .stream()
-            .map(ProductMapper::toDto)
-            .toList();    }
+    if (!userRepository.existsById(userId)) {
+        throw new NotFoundException("Usuario no encontrado");
+    }
+
+    return productRepository.findByOwnerId(userId)
+        .stream()
+        .map(ProductMapper::toDto)
+        .toList();
+}
+
+@Override
+public List<ProductResponseDto> getProductsByUserIdWithFilters(
+        Long userId,
+        String name,
+        Double minPrice,
+        Double maxPrice,
+        Long categoryId) {
+
+    if (!userRepository.existsById(userId)) {
+        throw new NotFoundException("Usuario no encontrado");
+    }
+
+    return productRepository.findByOwnerIdWithFilters(
+            userId, name, minPrice, maxPrice, categoryId)
+        .stream()
+        .map(ProductMapper::toDto)
+        .toList();
+}
+
 }

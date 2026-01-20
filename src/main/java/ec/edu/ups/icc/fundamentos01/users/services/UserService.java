@@ -30,4 +30,6 @@ public interface UserService {
         Long categoryId
     );
 
+   List<ProductResponseDto> getProductsByUserId(Long id);
+
 }
